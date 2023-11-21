@@ -1,4 +1,0 @@
-www.artima.com/pins1ed/a-scalable-language.html
-www.destroyallsoftware.com/compendium/network-protocols?share_key=97d3ba4c24d21147
-pytudes
-https://realpython.com/lessons/type-checking-mypy/
