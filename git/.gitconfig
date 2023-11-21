@@ -1,0 +1,5 @@
+[user]
+	email = bforsberg15@gmail.com
+	name = Brian Forsberg
+[core]
+	excludesfile = /Users/brian/.gitignore
