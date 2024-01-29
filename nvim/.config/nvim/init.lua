@@ -41,11 +41,9 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
-
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
-
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
@@ -67,6 +65,149 @@ require('lazy').setup({
 --      'folke/neodev.nvim',
 --    },
 --  },
+
+
+  {
+    "scalameta/nvim-metals",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      {
+        "mfussenegger/nvim-dap",
+        config = function(self, opts)
+          -- Debug settings if you're using nvim-dap
+          local dap = require("dap")
+
+          dap.configurations.scala = {
+            {
+              type = "scala",
+              request = "launch",
+              name = "RunOrTest",
+              metals = {
+                runType = "runOrTestFile",
+                --args = { "firstArg", "secondArg", "thirdArg" }, -- here just as an example
+              },
+            },
+            {
+              type = "scala",
+              request = "launch",
+              name = "Test Target",
+              metals = {
+                runType = "testTarget",
+              },
+            },
+          }
+        end
+      },
+    },
+    ft = { "scala", "sbt", "java" },
+    opts = function()
+      local metals_config = require("metals").bare_config()
+
+      -- Example of settings
+      metals_config.settings = {
+        showImplicitArguments = true,
+        excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+      }
+
+      -- *READ THIS*
+      -- I *highly* recommend setting statusBarProvider to true, however if you do,
+      -- you *have* to have a setting to display this in your statusline or else
+      -- you'll not see any messages from metals. There is more info in the help
+      -- docs about this
+      -- metals_config.init_options.statusBarProvider = "on"
+
+      -- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+      metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      metals_config.on_attach = function(client, bufnr)
+        require("metals").setup_dap()
+
+        -- LSP mappings
+        map("n", "gD", vim.lsp.buf.definition)
+        map("n", "K", vim.lsp.buf.hover)
+        map("n", "gi", vim.lsp.buf.implementation)
+        map("n", "gr", vim.lsp.buf.references)
+        map("n", "gds", vim.lsp.buf.document_symbol)
+        map("n", "gws", vim.lsp.buf.workspace_symbol)
+        map("n", "<leader>cl", vim.lsp.codelens.run)
+        map("n", "<leader>sh", vim.lsp.buf.signature_help)
+        map("n", "<leader>rn", vim.lsp.buf.rename)
+        map("n", "<leader>f", vim.lsp.buf.format)
+        map("n", "<leader>ca", vim.lsp.buf.code_action)
+
+        map("n", "<leader>ws", function()
+          require("metals").hover_worksheet()
+        end)
+
+        -- all workspace diagnostics
+        map("n", "<leader>aa", vim.diagnostic.setqflist)
+
+        -- all workspace errors
+        map("n", "<leader>ae", function()
+          vim.diagnostic.setqflist({ severity = "E" })
+        end)
+
+        -- all workspace warnings
+        map("n", "<leader>aw", function()
+          vim.diagnostic.setqflist({ severity = "W" })
+        end)
+
+        -- buffer diagnostics only
+        map("n", "<leader>d", vim.diagnostic.setloclist)
+
+        map("n", "[c", function()
+          vim.diagnostic.goto_prev({ wrap = false })
+        end)
+
+        map("n", "]c", function()
+          vim.diagnostic.goto_next({ wrap = false })
+        end)
+
+        -- Example mappings for usage with nvim-dap. If you don't use that, you can
+        -- skip these
+        map("n", "<leader>dc", function()
+          require("dap").continue()
+        end)
+
+        map("n", "<leader>dr", function()
+          require("dap").repl.toggle()
+        end)
+
+        map("n", "<leader>dK", function()
+          require("dap.ui.widgets").hover()
+        end)
+
+        map("n", "<leader>dt", function()
+          require("dap").toggle_breakpoint()
+        end)
+
+        map("n", "<leader>dso", function()
+          require("dap").step_over()
+        end)
+
+        map("n", "<leader>dsi", function()
+          require("dap").step_into()
+        end)
+
+        map("n", "<leader>dl", function()
+          require("dap").run_last()
+        end)
+      end
+
+      return metals_config
+    end,
+    config = function(self, metals_config)
+      local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = self.ft,
+        callback = function()
+          require("metals").initialize_or_attach(metals_config)
+        end,
+        group = nvim_metals_group,
+      })
+    end
+  },
+
 
   {
     -- Autocompletion
@@ -287,15 +428,46 @@ vim.o.termguicolors = true
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
+-- Brian's functions
 
+  --local opt = vim.opt
+  --
+  --opt.foldmethod = "expr"
+  --opt.foldexpr = "nvim_treesitter#foldexpr()"
+  --
+  --local api = vim.api
+  --local M = {}
+  ---- function to create a list of commands and convert them to autocommands
+  ---------- This function is taken from https://github.com/norcalli/nvim_utils
+  --function M.nvim_create_augroups(definitions)
+  --    for group_name, definition in pairs(definitions) do
+  --        api.nvim_command('augroup '..group_name)
+  --        api.nvim_command('autocmd!')
+  --        for _, def in ipairs(definition) do
+  --            local command = table.concat(vim.tbl_flatten{'autocmd', def}, ' ')
+  --            api.nvim_command(command)
+  --        end
+  --        api.nvim_command('augroup END')
+  --    end
+  --end
+  --
+  --
+  --local autoCommands = {
+  --    -- other autocommands
+  --    open_folds = {
+  --        {"BufReadPost,FileReadPost", "*", "normal zR"}
+  --    }
+  --}
+  --
+  --M.nvim_create_augroups(autoCommands)
 
-vim.keymap.set({ 'n' }, '<Space>p', [[:w<CR>:!python %<CR>]], { desc = '' })
-vim.keymap.set({ 'n' }, '<Space>t', [[:w<CR>:term python %<CR>]], { desc = '' })
-vim.keymap.set({ 'n' }, '<Space>fs', [[:w<CR>]], { desc = '' })
-vim.keymap.set({ 'n' }, '<Space>bp', [[:bp<CR>]], { desc = '' })
-vim.keymap.set({ 'n' }, '<Space>bn', [[:bn<CR>]], { desc = '' })
-vim.keymap.set({ 'n' }, '<Space>bd', [[:bd<CR>]], { desc = '' })
-
+vim.opt.autochdir = true
+vim.keymap.set({ 'n' }, '<leader>p', [[:w<CR>:!python %<CR>]], { desc = '' })
+vim.keymap.set({ 'n' }, '<leader>t', [[:w<CR>:term python %<CR>]], { desc = '' })
+vim.keymap.set({ 'n' }, '<leader>fs', [[:w<CR>]], { desc = '' })
+vim.keymap.set({ 'n' }, '<leader>bp', [[:bp<CR>]], { desc = '' })
+vim.keymap.set({ 'n' }, '<leader>bn', [[:bn<CR>]], { desc = '' })
+vim.keymap.set({ 'n' }, '<leader>bd', [[:bd<CR>]], { desc = '' })
 
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
