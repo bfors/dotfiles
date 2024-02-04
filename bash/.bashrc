@@ -18,3 +18,4 @@ update_site () {
 
 export HISTCONTROL=ignoredups
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+. "$HOME/.cargo/env"
