@@ -1,3 +1,4 @@
+alias ls="exa"
 alias ll="ls -la"
 alias edit_bashrc="vi ~/.bashrc"
 alias edit_nvim="vim ~/.config/nvim/init.lua"
