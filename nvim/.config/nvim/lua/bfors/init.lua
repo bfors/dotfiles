@@ -1,15 +1,34 @@
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+vim.o.expandtab = false
+vim.o.smartindent = true
+
 vim.opt.autochdir = false
-vim.keymap.set({ "n" }, "<leader>c", [[:w<CR>:!cargo run<CR>]], { desc = "" })
+vim.keymap.set({ "n" }, "<leader>c", [[:w<CR>:term go test ./lexer<CR>]], { desc = "" })
 vim.keymap.set({ "n" }, "<leader>p", [[:w<CR>:!python %<CR>]], { desc = "" })
-vim.keymap.set({ "n" }, "<leader>t", [[:w<CR>:term python %<CR>]], { desc = "" })
+-- vim.keymap.set({ "n" }, "<leader>t", [[:w<CR>:term python %<CR>]], { desc = "" })
+
 vim.keymap.set({ "n" }, "<leader>fs", [[:w<CR>]], { desc = "" })
 vim.keymap.set({ "n" }, "<leader>bp", [[:bp<CR>]], { desc = "" })
 vim.keymap.set({ "n" }, "<leader>bn", [[:bn<CR>]], { desc = "" })
 vim.keymap.set({ "n" }, "<leader>bd", [[:bd<CR>]], { desc = "" })
 vim.keymap.set({ "n" }, "<leader>q", [[:bd<CR>]], { desc = "" })
 
-local harpoon = require("harpoon")
+local function run_file()
+	local filetype = vim.bo.filetype
+	vim.cmd("w")
+	if filetype == "python" then
+		vim.cmd("term python %")
+	elseif filetype == "go" then
+		vim.cmd("term go run .")
+	elseif filetype == "rust" then
+		vim.cmd("term cargo run")
+	end
+end
 
+vim.keymap.set({ "n" }, "<leader>t", function() run_file() end, { desc = "" })
+
+local harpoon = require("harpoon")
 -- REQUIRED
 harpoon:setup({})
 
