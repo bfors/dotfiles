@@ -47,8 +47,6 @@ function journal() {
 
 export HISTCONTROL=ignoredups
 
-. "$HOME/.cargo/env"
-
 # UNUSED extra stuff
 #alias edit_bashrc_system="sudo vim /etc/bash.bashrc"
 #alias reload_bashrc_system="source /etc/bash.bashrc"
