@@ -1,8 +1,11 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+cd ~/dev
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -28,7 +31,7 @@ ZSH_THEME="af-magic"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -81,63 +84,111 @@ source $ZSH/oh-my-zsh.sh
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+export EDITOR='nvim'
+alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+########
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+export PATH=$HOME/dev/scripts:$PATH
+source ~/.zsh_profile
+source ~/.localstack.zsh
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+alias ez="nvim +138 ~/.zshrc"
+alias rz="source ~/.zshrc && source ~/.zprofile"
+alias et="nvim ~/.tmux.conf"
+alias rt="tmux source-file ~/.tmux.conf"
 
+alias t="lsd --tree"
 alias vim="nvim"
-alias ls="exa"
-alias ll="exa -la"
-alias af="airflow"
+alias ls="lsd"
+alias ll="lsd -la"
 alias size="df -h"
-alias ports="ss -tunlp"
-
-alias edit_zshrc="nvim +119 ~/.zshrc"
-alias reload_zshrc="source ~/.zshrc"
-
 alias remove_swap="cd /home/bfors/.local/state/nvim/swap && rm * && cd -"
-alias create_venv="python3 -m venv .venv && activate"
-alias activate="source .venv/bin/activate"
 
-export host='206.81.0.24'
-alias nyc_root="ssh root@$host"
-alias nyc="ssh bfors@$host"
+alias gw="git worktree"
+alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
+
+alias up="docker-compose up --remove-orphans"
+alias down="docker-compose down"
+
+alias create_venv="uv venv --python 3.11 && activate"
+alias delete_venv="deactivate && rm -rf .venv"
+alias activate="source .venv/bin/activate"
+alias install="uv pip install -r requirements.txt"
+alias init="create_venv && install"
+alias pip="uv pip"
+alias run_jupyter="uv run --with jupyter jupyter notebook"
+
+alias llm="uv run --isolated --with mlx-lm python -m mlx_lm chat"
+
+
+check_cert() {
+	openssl s_client -connect $1:443 -showcerts
+}
+
+port() {
+	lsof -i -P | grep LISTEN | grep :$1
+}
+
+format_json() {
+	jq . $1 | sponge $1
+}
+
+format_yaml() {
+	yq . $1 | sponge $1
+}
+
 
 changedir() {
-	cd $(find ~/dev ~/  -mindepth 1 -maxdepth 1 -type d | fzf)
-	deactivate
-	activate
+	deactivate &> /dev/null
+	activate &> /dev/null
+	cd $(find ~/dev ~/ ~/dev/go/src ~/dev/go/src/github.com/* -mindepth 1 -maxdepth 2 -type d | fzf)
 }
 bindkey -s ^f "changedir\n^l"
 
-function fhir() {
-	fhirbase -d fhirbase --host /var/run/postgresql -p 5432 -U bfors -W postgrespass $1 $2 $3 $4
+
+open_session() {
+	activate &> /dev/null 
+	nvim .
+}
+bindkey -s ^n "open_session\n^l"
+
+open_tmux() {
+	if tmux ls &>/dev/null; then
+		tmux attach
+	else
+		local cwd=$(pwd)
+		tmux new-session "cd $(pwd); exec zsh"\; split-window -h \; split-window -v
+	fi
+}
+bindkey -s ^b "open_tmux\n"
+
+on_change ()
+{
+	# deactivate &> /dev/null
+	activate &> /dev/null
 }
 
-function journal() {
-   journalctl -u $1 -f --no-pager
+to_clipboard()
+{
+	cat $1 | pbcopy
 }
+
+chpwd_functions+=("on_change")
+
 
 export HISTCONTROL=ignoredups
+export GOPRIVATE="github.com/rvo-redplatform"
+export PATH=$PATH:$(go env GOPATH)/bin
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/terraform terraform
+
+. "$HOME/.local/bin/env"
+
 
 eval "$(fzf --zsh)"
-source ~/.zsh_profile
 fpath=(~/.zsh.d/ $fpath)
+
+. "$HOME/.cargo/env"
