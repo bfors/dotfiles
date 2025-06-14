@@ -100,6 +100,7 @@ alias et="nvim ~/.tmux.conf"
 alias rt="tmux source-file ~/.tmux.conf"
 
 alias t="lsd --tree"
+alias s="source"
 alias vim="nvim"
 alias ls="lsd"
 alias ll="lsd -la"
