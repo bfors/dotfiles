@@ -2,6 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 cd ~/dev
+cd -
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -80,9 +81,10 @@ plugins=(git virtualenv)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+export HISTCONTROL=ignoredups
 
-# export MANPATH="/usr/local/man:$MANPATH"
+autoload -U +X bashcompinit && bashcompinit
+
 
 export LANG=en_US.UTF-8
 export EDITOR='nvim'
@@ -90,7 +92,9 @@ alias ohmyzsh="mate ~/.oh-my-zsh"
 
 ########
 
+touch $HOME/dev/scripts
 export PATH=$HOME/dev/scripts:$PATH
+touch ~/.zsh_profile
 source ~/.zsh_profile
 source ~/.localstack.zsh
 
@@ -105,15 +109,17 @@ alias vim="nvim"
 alias ls="lsd"
 alias ll="lsd -la"
 alias size="df -h"
-alias remove_swap="cd /home/bfors/.local/state/nvim/swap && rm * && cd -"
+alias ..="cd .."
 
 alias gw="git worktree"
 alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
 
 alias up="docker-compose up --remove-orphans"
 alias down="docker-compose down"
+alias build="docker-compose build"
+alias bup="build && up"
 
-alias create_venv="uv venv --python 3.11 && activate"
+alias create_venv="uv venv --python 3.12 && activate"
 alias delete_venv="deactivate && rm -rf .venv"
 alias activate="source .venv/bin/activate"
 alias install="uv pip install -r requirements.txt"
@@ -122,6 +128,7 @@ alias pip="uv pip"
 alias run_jupyter="uv run --with jupyter jupyter notebook"
 
 alias llm="uv run --isolated --with mlx-lm python -m mlx_lm chat"
+alias remove_swap="cd /home/bfors/.local/state/nvim/swap && rm * && cd -"
 
 
 check_cert() {
@@ -178,18 +185,11 @@ to_clipboard()
 
 chpwd_functions+=("on_change")
 
-
-export HISTCONTROL=ignoredups
-export GOPRIVATE="github.com/rvo-redplatform"
-export PATH=$PATH:$(go env GOPATH)/bin
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /opt/homebrew/bin/terraform terraform
-
 . "$HOME/.local/bin/env"
-
 
 eval "$(fzf --zsh)"
 fpath=(~/.zsh.d/ $fpath)
 
 . "$HOME/.cargo/env"
+alias claude="/Users/bforsberg/.claude/local/claude"
+
