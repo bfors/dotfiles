@@ -92,13 +92,13 @@ alias ohmyzsh="mate ~/.oh-my-zsh"
 
 ########
 
-touch $HOME/dev/scripts
-export PATH=$HOME/dev/scripts:$PATH
+export PATH=$HOME/dotfiles/scripts:$PATH
 touch ~/.zsh_profile
 source ~/.zsh_profile
 source ~/.localstack.zsh
 
 alias ez="nvim +138 ~/.zshrc"
+alias ep="nvim ~/.zprofile"
 alias rz="source ~/.zshrc && source ~/.zprofile"
 alias et="nvim ~/.tmux.conf"
 alias rt="tmux source-file ~/.tmux.conf"
@@ -183,6 +183,26 @@ to_clipboard()
 	cat $1 | pbcopy
 }
 
+function klog() {
+    local namespaces=("pundit" "aip-evals-data")
+    local namespace=$(printf '%s\n' "${namespaces[@]}" | fzf --prompt="Select namespace: ")
+
+    if [[ -z "$namespace" ]]; then
+      echo "No namespace selected"
+      return 1
+    fi
+
+    local pod=$(kubectl get pods -n "$namespace" --field-selector=status.phase=Running -o name | sed 's/pod\///' | fzf --prompt="Select pod: ")
+
+    if [[ -n "$pod" ]]; then
+      kubectl logs "$pod" -n "$namespace" -f
+    else
+      echo "No pod selected"
+    fi
+}
+
+bindkey -s ^k "klog\n^l"
+
 chpwd_functions+=("on_change")
 
 . "$HOME/.local/bin/env"
@@ -191,5 +211,18 @@ eval "$(fzf --zsh)"
 fpath=(~/.zsh.d/ $fpath)
 
 . "$HOME/.cargo/env"
-alias claude="/Users/bforsberg/.claude/local/claude"
 
+
+# Other stuff
+
+tempe () {
+  cd "$(mktemp -d)"
+  chmod -R 0700 .
+  if [[ $# -eq 1 ]]; then
+    \mkdir -p "$1"
+    cd "$1"
+    chmod -R 0700 .
+  fi
+}
+
+alias cpwd="pwd | pbcopy"
