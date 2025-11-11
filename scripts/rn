@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+date "+%l:%M%p on %A, %B %e, %Y"
+echo
+cal | sed "s/ $(date '+%e') / \x1b[1;31m$(date '+%e')\x1b[0m /g"
+
+

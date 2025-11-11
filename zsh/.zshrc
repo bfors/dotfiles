@@ -1,6 +1,3 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 cd ~/dev
 cd -
 
@@ -38,23 +35,15 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # Uncomment the following line to change how often to auto-update (in days).
 # zstyle ':omz:update' frequency 13
 
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
 # DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
 # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
@@ -69,8 +58,6 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # see 'man strftime' for details.
 # HIST_STAMPS="mm/dd/yyyy"
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
@@ -111,14 +98,36 @@ alias ll="lsd -la"
 alias size="df -h"
 alias ..="cd .."
 
+##### GIT
 alias gw="git worktree"
+
+alias root='cd $(git rev-parse --show-toplevel)'
+
 alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
 
+clone() {
+	cd ~/dev
+	git clone --bare $(pbpaste)
+	cd $(basename $(pbpaste))
+}
+
+gwa() {
+	git worktree add $1 && cd $1
+}
+
+changebranch() {
+	dir=$(gw list | fzf | awk '{print $1}') && cd "$dir"
+}
+bindkey -s ^g "changebranch\n"
+
+
+##### DOCKER
 alias up="docker-compose up --remove-orphans"
 alias down="docker-compose down"
 alias build="docker-compose build"
 alias bup="build && up"
 
+##### PYTHON
 alias create_venv="uv venv --python 3.12 && activate"
 alias delete_venv="deactivate && rm -rf .venv"
 alias activate="source .venv/bin/activate"
@@ -126,9 +135,19 @@ alias install="uv pip install -r requirements.txt"
 alias init="create_venv && install"
 alias pip="uv pip"
 alias run_jupyter="uv run --with jupyter jupyter notebook"
-
 alias llm="uv run --isolated --with mlx-lm python -m mlx_lm chat"
+
+
+##### OTHER
 alias remove_swap="cd /home/bfors/.local/state/nvim/swap && rm * && cd -"
+
+c() {
+    local tmpfile=$(mktemp)
+    nvim "$tmpfile" < /dev/tty > /dev/tty
+    cat "$tmpfile"
+    claude -p $(cat "$tmpfile")
+    rm "$tmpfile"
+}
 
 
 check_cert() {
@@ -151,7 +170,8 @@ format_yaml() {
 changedir() {
 	deactivate &> /dev/null
 	activate &> /dev/null
-	cd $(find ~/dev ~/ ~/dev/go/src ~/dev/go/src/github.com/* -mindepth 1 -maxdepth 2 -type d | fzf)
+	dir=$(find ~/dev ~/ ~/dev/go/src ~/dev/go/src/github.com/* -mindepth 1 -maxdepth 2 -type d | fzf) && cd "$dir"
+
 }
 bindkey -s ^f "changedir\n^l"
 
@@ -174,7 +194,6 @@ bindkey -s ^b "open_tmux\n"
 
 on_change ()
 {
-	# deactivate &> /dev/null
 	activate &> /dev/null
 }
 
@@ -183,34 +202,13 @@ to_clipboard()
 	cat $1 | pbcopy
 }
 
-function klog() {
-    local namespaces=("pundit" "aip-evals-data")
-    local namespace=$(printf '%s\n' "${namespaces[@]}" | fzf --prompt="Select namespace: ")
-
-    if [[ -z "$namespace" ]]; then
-      echo "No namespace selected"
-      return 1
-    fi
-
-    local pod=$(kubectl get pods -n "$namespace" --field-selector=status.phase=Running -o name | sed 's/pod\///' | fzf --prompt="Select pod: ")
-
-    if [[ -n "$pod" ]]; then
-      kubectl logs "$pod" -n "$namespace" -f
-    else
-      echo "No pod selected"
-    fi
-}
-
-bindkey -s ^k "klog\n^l"
 
 chpwd_functions+=("on_change")
 
-. "$HOME/.local/bin/env"
 
 eval "$(fzf --zsh)"
 fpath=(~/.zsh.d/ $fpath)
 
-. "$HOME/.cargo/env"
 
 
 # Other stuff
@@ -223,6 +221,16 @@ tempe () {
     cd "$1"
     chmod -R 0700 .
   fi
+}
+
+boop () {
+  local last="$?"
+  if [[ "$last" == '0' ]]; then
+    sfx good
+  else
+    sfx bad
+  fi
+  $(exit "$last")
 }
 
 alias cpwd="pwd | pbcopy"
