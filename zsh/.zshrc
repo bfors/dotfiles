@@ -82,7 +82,6 @@ alias ohmyzsh="mate ~/.oh-my-zsh"
 export PATH=$HOME/dotfiles/scripts:$PATH
 touch ~/.zsh_profile
 source ~/.zsh_profile
-source ~/.localstack.zsh
 
 alias ez="nvim +138 ~/.zshrc"
 alias ep="nvim ~/.zprofile"
