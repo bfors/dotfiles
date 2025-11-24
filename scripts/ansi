@@ -1,0 +1,24 @@
+#!/usr/bin/env -S uv run --script
+
+
+CSI = "\x1B[" # Control Sequence Introducer
+FULL_BLOCK = "\u2588"
+
+# Apply red foreground (31) on black background (40) and print a block
+print(f"{CSI}31;40m{FULL_BLOCK}{CSI}0m")
+
+def generate_ansi_table():
+    """Prints a demonstration table of ANSI text formatting combinations."""
+    for style in range(8):
+        for fg in range(30, 38):
+            s1 = ''
+            for bg in range(40, 48):
+                # Format string: style;foreground;background
+                format_code = ';'.join([str(style), str(fg), str(bg)])
+                # Print the code itself, wrapped in its own formatting
+                s1 += f'\x1b[{format_code}m {format_code} \x1b[0m'
+            print(s1)
+        print('\n')
+
+# Uncomment to run and see the resulting table:
+generate_ansi_table()
