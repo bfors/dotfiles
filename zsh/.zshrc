@@ -99,10 +99,21 @@ alias ..="cd .."
 
 ##### GIT
 alias gw="git worktree"
-
 alias root='cd $(git rev-parse --show-toplevel)'
 
+
+
 alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
+
+gw_merge() {
+	export current=$PWD
+	root
+	cd ../main
+	git pull
+	echo $current
+	cd $current
+	git merge main
+}
 
 clone() {
 	cd ~/dev
@@ -142,9 +153,10 @@ alias remove_swap="cd /home/bfors/.local/state/nvim/swap && rm * && cd -"
 
 c() {
     local tmpfile=$(mktemp)
-    nvim "$tmpfile" < /dev/tty > /dev/tty
-    cat "$tmpfile"
-    claude -p $(cat "$tmpfile")
+    nvim +startinsert "$tmpfile" < /dev/tty > /dev/tty
+    local content=$(cat "$tmpfile")
+    echo "$content"
+    claude -p "$content"
     rm "$tmpfile"
 }
 
