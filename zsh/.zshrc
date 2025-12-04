@@ -120,6 +120,7 @@ clone() {
 	cd ~/dev
 	git clone --bare $(pbpaste)
 	cd $(basename $(pbpaste))
+	gwa main
 }
 
 gwa() {
@@ -221,7 +222,8 @@ chpwd_functions+=("on_change")
 eval "$(fzf --zsh)"
 fpath=(~/.zsh.d/ $fpath)
 
-
+alias scripts="l ~/dotfiles/scripts"
+alias ip="curl https://checkip.amazonaws.com"
 
 # Other stuff
 
