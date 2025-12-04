@@ -169,8 +169,11 @@ format_yaml() {
 changedir() {
 	deactivate &> /dev/null
 	activate &> /dev/null
-	dir=$(find ~/dev ~/ ~/dev/go/src ~/dev/go/src/github.com/* -mindepth 1 -maxdepth 2 -type d | fzf) && cd "$dir"
-
+	search_paths=("$HOME/dev" "$HOME")
+	if [ $(whoami) = 'bforsberg' ]; then
+		search_paths=("$HOME/dev $HOME/" "$HOME/dev/go/src" "$HOME/dev/go/src/github.com/*")
+	fi
+	dir=$(find "${search_paths[@]}" -mindepth 1 -maxdepth 2 -type d | fzf) && cd "$dir"
 }
 bindkey -s ^f "changedir\n^l"
 
