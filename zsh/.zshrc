@@ -120,6 +120,7 @@ clone() {
 	git clone --bare $(pbpaste)
 	cd $(basename $(pbpaste))
 	gwa main
+	cd main
 }
 
 gwa() {
