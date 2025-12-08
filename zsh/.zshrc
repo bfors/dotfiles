@@ -99,20 +99,17 @@ alias ..="cd .."
 
 ##### GIT
 alias gw="git worktree"
-alias root='cd $(git rev-parse --show-toplevel)'
-
-
 
 alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
+#'cd $(git rev-parse --show-toplevel)'
 
-gw_merge() {
-	export current=$PWD
-	root
-	cd ../main
-	git pull
-	echo $current
-	cd $current
-	git merge main
+root() {
+	dir=$(gw list | head -1 | awk '{print $1}') && cd "$dir"
+	if [[ -d "main" ]]; then
+		cd main
+	fi
+	if [[ -d "master" ]]; then
+	fi
 }
 
 clone() {
@@ -123,7 +120,22 @@ clone() {
 	cd main
 }
 
+gw_update_main() {
+	export current=$PWD
+	root
+	cd ../main
+	git pull
+	echo $current
+	cd $current
+}
+
+gw_merge() {
+	gw_update_main
+	git merge main
+}
+
 gwa() {
+	gw_update_main
 	git worktree add $1 && cd $1
 }
 
@@ -185,7 +197,7 @@ changedir() {
 	activate &> /dev/null
 	search_paths=("$HOME/dev" "$HOME")
 	if [ $(whoami) = 'bforsberg' ]; then
-		search_paths=("$HOME/dev $HOME/" "$HOME/dev/go/src" "$HOME/dev/go/src/github.com/*")
+		search_paths=("$HOME/dev" "$HOME/" "$HOME/dev/go/src" "$HOME/dev/go/src/github.com/*")
 	fi
 	dir=$(find "${search_paths[@]}" -mindepth 1 -maxdepth 2 -type d | fzf) && cd "$dir"
 }
