@@ -93,6 +93,8 @@ toplevel() {
 	cd $dir
 }
 alias tl="toplevel"
+alias bare="toplevel && .."
+alias main="bare && cd main"
 
 setup_worktree() {
 	git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' 
@@ -102,10 +104,17 @@ setup_worktree() {
 
 root() {
 	dir=$(gw list | head -1 | awk '{print $1}') && cd "$dir"
+	if [[ -d "develop" ]]; then
+		cd develop
+		return
+	fi
 	if [[ -d "main" ]]; then
 		cd main
+		return
 	fi
 	if [[ -d "master" ]]; then
+		cd master
+		return
 	fi
 }
 
