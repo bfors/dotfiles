@@ -32,17 +32,6 @@ ZSH_THEME="af-magic"
 zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
@@ -72,16 +61,15 @@ export HISTCONTROL=ignoredups
 
 autoload -U +X bashcompinit && bashcompinit
 
-
 export LANG=en_US.UTF-8
 export EDITOR='nvim'
 alias ohmyzsh="mate ~/.oh-my-zsh"
 
-########
-
 export PATH=$HOME/dotfiles/scripts:$PATH
 touch ~/.zsh_profile
 source ~/.zsh_profile
+
+########
 
 alias ez="nvim +138 ~/.zshrc"
 alias ep="nvim ~/.zprofile"
@@ -100,8 +88,17 @@ alias ..="cd .."
 ##### GIT
 alias gw="git worktree"
 
-alias setup_worktree="git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && git fetch && git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}"
-#'cd $(git rev-parse --show-toplevel)'
+toplevel() {
+	local dir=$(git rev-parse --show-toplevel)
+	cd $dir
+}
+alias tl="toplevel"
+
+setup_worktree() {
+	git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' 
+	git fetch 
+	git for-each-ref --format='%(refname:short)' refs/heads | xargs -n1 -I{} git branch --set-upstream-to=origin/{}
+}
 
 root() {
 	dir=$(gw list | head -1 | awk '{print $1}') && cd "$dir"
@@ -128,6 +125,7 @@ gw_update_main() {
 	echo $current
 	cd $current
 }
+alias gwu="gw_update_main"
 
 gw_merge() {
 	gw_update_main
