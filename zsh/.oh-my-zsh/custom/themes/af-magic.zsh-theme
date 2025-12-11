@@ -100,5 +100,14 @@ ZSH_THEME_HG_PROMPT_DIRTY="${FG[214]}*%{$reset_color%}"
 ZSH_THEME_HG_PROMPT_SUFFIX="${FG[075]})%{$reset_color%}"
 
 # virtualenv settings
-ZSH_THEME_VIRTUALENV_PREFIX="${FG[075]}["
+ZSH_THEME_VIRTUALENV_PREFIX=" ${FG[075]}["
 ZSH_THEME_VIRTUALENV_SUFFIX="]%{$reset_color%}"
+
+# override virtualenv_prompt_info to strip trailing space
+function virtualenv_prompt_info(){
+  [[ -n ${VIRTUAL_ENV} ]] || return
+  local prompt="${VIRTUAL_ENV_PROMPT:-${VIRTUAL_ENV:t:gs/%/%%}}"
+  # strip trailing whitespace
+  prompt="${prompt%% }"
+  echo "${ZSH_THEME_VIRTUALENV_PREFIX}${prompt}${ZSH_THEME_VIRTUALENV_SUFFIX}"
+}
