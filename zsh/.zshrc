@@ -74,6 +74,7 @@ source ~/.zsh_profile
 alias ez="nvim +138 ~/.zshrc"
 alias ep="nvim ~/.zprofile"
 alias rz="source ~/.zshrc"
+bindkey -s ^] "rz\n"
 alias rp="source ~/.zprofile"
 alias et="nvim ~/.tmux.conf"
 alias rt="tmux source-file ~/.tmux.conf"
