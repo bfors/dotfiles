@@ -3,3 +3,4 @@
 background = #1F2228
 keybind = super+left=previous_tab
 keybind = super+right=next_tab
+keybind = shift+enter=text:\x1b\r
