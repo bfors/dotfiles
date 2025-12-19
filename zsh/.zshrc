@@ -74,6 +74,7 @@ source ~/.zsh_profile
 alias ez="nvim +138 ~/.zshrc"
 alias ep="nvim ~/.zprofile"
 alias rz="source ~/.zshrc"
+# bindkey -s [91;5u "ez\n"
 bindkey -s ^] "rz\n"
 alias rp="source ~/.zprofile"
 alias et="nvim ~/.tmux.conf"
@@ -125,7 +126,6 @@ clone() {
 	git clone --bare $(pbpaste)
 	cd $(basename $(pbpaste))
 	gwa main
-	cd main
 }
 
 gw_update_main() {
