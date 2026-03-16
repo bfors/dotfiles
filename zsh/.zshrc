@@ -80,7 +80,8 @@ alias rp="source ~/.zprofile"
 alias et="nvim ~/.tmux.conf"
 alias rt="tmux source-file ~/.tmux.conf"
 
-alias t="lsd --tree"
+alias t="lsd -I '*__pycache__*' -I '*egg-info' -I '*node_modules*' --tree"
+alias tall="lsd --tree"
 alias s="source"
 alias vim="nvim"
 alias ls="lsd"
@@ -272,3 +273,11 @@ boop () {
 }
 
 alias cpwd="pwd | pbcopy"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# peon-ping quick controls
+alias peon="bash /Users/bfors/.claude/hooks/peon-ping/peon.sh"
+[ -f /Users/bfors/.claude/hooks/peon-ping/completions.bash ] && source /Users/bfors/.claude/hooks/peon-ping/completions.bash

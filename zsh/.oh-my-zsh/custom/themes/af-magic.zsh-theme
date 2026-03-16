@@ -24,12 +24,12 @@ function afmagic_dashes {
 __afmagic_elapsed_time=""
 
 function __afmagic_preexec() {
-  __afmagic_timer=$(($(gdate +%s%0N)/1000000))
+  __afmagic_timer=$(($(date +%s%0)/1000000))
 }
 
 function __afmagic_precmd() {
   if [ "$__afmagic_timer" ]; then
-    local now=$(($(gdate +%s%0N)/1000000))
+    local now=$(($(date +%s%0)/1000000))
     local elapsed=$(($now-$__afmagic_timer))
     __afmagic_elapsed_time="$(__afmagic_converts "$elapsed")"
     unset __afmagic_timer
